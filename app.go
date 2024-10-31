@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
@@ -22,6 +25,24 @@ func (a *App) startup(ctx context.Context) {
 }
 
 // Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
+func (a *App) CountUp(name string) string {
+	go func() {
+		ticker := time.NewTicker(time.Second)
+		var stepCount int = 0
+		defer ticker.Stop()
+		done := make(chan bool)
+
+		for {
+			select {
+			case <-done:
+				fmt.Println("Done!")
+				return
+			case <-ticker.C:
+				stepCount++
+				fmt.Println("Count: ", stepCount)
+				runtime.EventsEmit(a.ctx, "CountUp", fmt.Sprintf("Count: %d", stepCount))
+			}
+		}
+	}()
+	return fmt.Sprintf("Count: %d", 0)
 }

@@ -1,14 +1,17 @@
 <script setup>
 import {reactive} from 'vue'
-import {Greet} from '../../wailsjs/go/main/App'
+import {CountUp} from '../../wailsjs/go/main/App'
+import {EventsOn} from '../../wailsjs/runtime/runtime'
 
 const data = reactive({
   name: "",
-  resultText: "Please enter your name below 👇",
+  resultText: "Start the Counter",
 })
 
-function greet() {
-  Greet(data.name).then(result => {
+EventsOn("CountUp", (count) => data.resultText = count)
+
+function countUp() {
+  CountUp().then(result => {
     data.resultText = result
   })
 }
@@ -17,10 +20,9 @@ function greet() {
 
 <template>
   <main>
-    <div id="result" class="result">{{ data.resultText }}</div>
+    <h2 id="result" class="result">{{ data.resultText }}</h2>
     <div id="input" class="input-box">
-      <input id="name" v-model="data.name" autocomplete="off" class="input" type="text"/>
-      <button class="btn" @click="greet">Greet</button>
+      <button class="btn" @click="countUp">Start</button>
     </div>
   </main>
 </template>
