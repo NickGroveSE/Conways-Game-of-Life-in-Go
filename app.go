@@ -13,6 +13,10 @@ type App struct {
 	ctx context.Context
 }
 
+var (
+	stepCount int = 0
+)
+
 // NewApp creates a new App application struct
 func NewApp() *App {
 	return &App{}
@@ -28,7 +32,6 @@ func (a *App) startup(ctx context.Context) {
 func (a *App) CountUp(name string) string {
 	go func() {
 		ticker := time.NewTicker(time.Second)
-		var stepCount int = 0
 		defer ticker.Stop()
 		done := make(chan bool)
 
