@@ -1,6 +1,6 @@
 <script setup>
 import {reactive, onMounted} from 'vue'
-import {CountUp} from '../../wailsjs/go/main/App'
+import {CountUp, StoreCell} from '../../wailsjs/go/main/App'
 import {EventsOn} from '../../wailsjs/runtime/runtime'
 
 // EventsOn("CountUp", (count) => data.resultText = count)
@@ -42,18 +42,28 @@ import {EventsOn} from '../../wailsjs/runtime/runtime'
   }
 
   function cellClicked(event) {
-    var cellXOrigin = event.clientX - (event.clientX % 20) + 1
-    var cellYOrigin = event.clientY - (event.clientY % 20) + 1
+    var cellXOrigin = event.clientX - (event.clientX % 20) 
+    var cellYOrigin = event.clientY - (event.clientY % 20)
 
-    var cellColorData= data.vueCanvas.getImageData(cellXOrigin, cellYOrigin, 19, 19)
+    var cellColorData= data.vueCanvas.getImageData(cellXOrigin + 1, cellYOrigin + 1, 19, 19)
+
+    var cellXPosition = cellXOrigin / 20
+    var cellYPosition = cellYOrigin / 20
     
     if(cellColorData.data[0] > 0) {
       data.vueCanvas.fillStyle = "#FFFFFF"
+      data.vueCanvas.fillRect(cellXOrigin + 1, cellYOrigin + 1, 19, 19)
+      StoreCell(cellXPosition, cellYPosition, false).then(result => {
+        alert(result)
+      })
     } else {
       data.vueCanvas.fillStyle = "#C187D1"
+      data.vueCanvas.fillRect(cellXOrigin + 1, cellYOrigin + 1, 19, 19)
+      StoreCell(cellXPosition, cellYPosition, true).then(result => {
+        alert(result)
+      })
     }
 
-    data.vueCanvas.fillRect(cellXOrigin, cellYOrigin, 19, 19)
   }
 
 </script>

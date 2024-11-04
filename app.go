@@ -15,6 +15,7 @@ type App struct {
 
 var (
 	stepCount int = 0
+	grid      [][]bool
 )
 
 // NewApp creates a new App application struct
@@ -26,9 +27,23 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	a.buildMatrix(50, 40)
 }
 
-// Greet returns a greeting for the given name
+func (a *App) buildMatrix(sizeX int, sizeY int) {
+
+	matrix := make([][]bool, sizeY)
+	for i := range matrix {
+		matrix[i] = make([]bool, sizeX)
+		for j := range matrix[i] {
+			matrix[i][j] = false
+		}
+	}
+
+	grid = matrix
+
+}
+
 func (a *App) CountUp(name string) string {
 	go func() {
 		ticker := time.NewTicker(time.Second)
@@ -48,4 +63,16 @@ func (a *App) CountUp(name string) string {
 		}
 	}()
 	return fmt.Sprintf("Count: %d", 0)
+}
+
+func (a *App) StoreCell(x int, y int, filled bool) string {
+
+	grid[x][y] = filled
+
+	if grid[x][y] {
+		return fmt.Sprintf("Cell %d,%d is now filled", x, y)
+	} else {
+		return fmt.Sprintf("Cell %d,%d is now blank", x, y)
+	}
+
 }

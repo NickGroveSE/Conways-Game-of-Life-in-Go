@@ -5,3 +5,7 @@
 export function CountUp(arg1) {
   return window['go']['main']['App']['CountUp'](arg1);
 }
+
+export function StoreCell(arg1, arg2, arg3) {
+  return window['go']['main']['App']['StoreCell'](arg1, arg2, arg3);
+}
