@@ -23,11 +23,13 @@ import {EventsOn} from '../../wailsjs/runtime/runtime'
     drawBoard()
   })
 
-  EventsOn("Next", (filledCells) => nextCallback(filledCells))
+  EventsOn("Start", (filledCells) => periodicFillCallback(iterations, filledCells))
+  EventsOn("Next", (filledCells) => singularFillCallback(filledCells))
+  EventsOn("Reset", (filledCells) => singularFillCallback(filledCells))
 
-  // EventsOn("Start", (filledCells) => {
-  //   clearRect(0, 0, 1000, 800)
-  // })
+  function start() {
+    Start()
+  }
 
   function next() {
     Next().then(result => {
@@ -36,14 +38,16 @@ import {EventsOn} from '../../wailsjs/runtime/runtime'
   }
 
   function reset() {
-    data.iterationsCount = 0
-    data.vueCanvas.clearRect(0, 0, 1000, 800)
-    drawBoard()
-
-    
+    Reset().then(result => {
+      data.iterationsCount = result
+    })
   }
 
-  function nextCallback(filledCells) {
+  function periodicFillCallback(iterations, filledCells) {
+
+  }
+
+  function singularFillCallback(filledCells) {
     data.vueCanvas.clearRect(0, 0, 1000, 800)
     drawBoard()
 

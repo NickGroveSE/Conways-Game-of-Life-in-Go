@@ -6,6 +6,10 @@ export function Next() {
   return window['go']['main']['App']['Next']();
 }
 
+export function Reset() {
+  return window['go']['main']['App']['Reset']();
+}
+
 export function Start() {
   return window['go']['main']['App']['Start']();
 }

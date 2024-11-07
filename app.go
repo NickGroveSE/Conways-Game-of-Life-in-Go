@@ -209,6 +209,18 @@ func (a *App) Next() string {
 	return fmt.Sprintf("Iterations: %d", stepCount)
 }
 
+func (a *App) Reset() string {
+	stepCount = 0
+
+	go func() {
+		a.buildMatrix(50, 40)
+
+		runtime.EventsEmit(a.ctx, "Next", make([][2]int, 0))
+	}()
+
+	return fmt.Sprintf("Iterations: %d", stepCount)
+}
+
 func (a *App) StoreCell(x int, y int, filled bool) string {
 
 	if filled {
