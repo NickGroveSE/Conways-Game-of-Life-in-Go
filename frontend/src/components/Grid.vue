@@ -1,6 +1,6 @@
 <script setup>
 import {reactive, onMounted} from 'vue'
-import {CountUp, StoreCell} from '../../wailsjs/go/main/App'
+import {Start, Next, Reset, StoreCell} from '../../wailsjs/go/main/App'
 import {EventsOn} from '../../wailsjs/runtime/runtime'
 
 // EventsOn("CountUp", (count) => data.resultText = count)
@@ -12,7 +12,8 @@ import {EventsOn} from '../../wailsjs/runtime/runtime'
 // }
 
   const data = reactive({
-    vueCanvas: null
+    vueCanvas: null,
+    iterationsCount: "Iterations: 0",
   })
 
   onMounted(() => {
@@ -21,6 +22,39 @@ import {EventsOn} from '../../wailsjs/runtime/runtime'
     data.vueCanvas = ctx;
     drawBoard()
   })
+
+  EventsOn("Next", (filledCells) => nextCallback(filledCells))
+
+  // EventsOn("Start", (filledCells) => {
+  //   clearRect(0, 0, 1000, 800)
+  // })
+
+  function next() {
+    Next().then(result => {
+      data.iterationsCount = result
+    })
+  }
+
+  function reset() {
+    data.iterationsCount = 0
+    data.vueCanvas.clearRect(0, 0, 1000, 800)
+    drawBoard()
+
+    
+  }
+
+  function nextCallback(filledCells) {
+    data.vueCanvas.clearRect(0, 0, 1000, 800)
+    drawBoard()
+
+    for (var i = 0; i < filledCells.length; i++) {
+      fillCell("#9C27B0", filledCells[i][1] * 20 + 1, filledCells[i][0] * 20 + 1, 19, 19)
+    }
+  }
+
+  // function start() {
+
+  // }
 
   // grid width and height
   var bw = 1000;
@@ -50,20 +84,23 @@ import {EventsOn} from '../../wailsjs/runtime/runtime'
     var cellXPosition = cellXOrigin / 20
     var cellYPosition = cellYOrigin / 20
     
-    if(cellColorData.data[0] > 0) {
-      data.vueCanvas.fillStyle = "#FFFFFF"
-      data.vueCanvas.fillRect(cellXOrigin + 1, cellYOrigin + 1, 19, 19)
-      StoreCell(cellXPosition, cellYPosition, false).then(result => {
-        alert(result)
-      })
+    if(cellColorData.data[0] != 0 && cellColorData.data[0] == 156) {
+      // data.vueCanvas.fillStyle = "#FFFFFF"
+      // data.vueCanvas.fillRect(cellXOrigin + 1, cellYOrigin + 1, 19, 19)
+      fillCell("#FFFFFF", cellXOrigin + 1, cellYOrigin + 1, 19, 19)
+      StoreCell(cellXPosition, cellYPosition, false)
     } else {
-      data.vueCanvas.fillStyle = "#C187D1"
-      data.vueCanvas.fillRect(cellXOrigin + 1, cellYOrigin + 1, 19, 19)
-      StoreCell(cellXPosition, cellYPosition, true).then(result => {
-        alert(result)
-      })
+      // data.vueCanvas.fillStyle = "#9C27B0"
+      // data.vueCanvas.fillRect(cellXOrigin + 1, cellYOrigin + 1, 19, 19)
+      fillCell("#9C27B0", cellXOrigin + 1, cellYOrigin + 1, 19, 19)
+      StoreCell(cellXPosition, cellYPosition, true)
     }
 
+  }
+
+  function fillCell(color, x, y, width, height) {
+    data.vueCanvas.fillStyle = color
+    data.vueCanvas.fillRect(x, y, width, height)
   }
 
 </script>
@@ -71,6 +108,11 @@ import {EventsOn} from '../../wailsjs/runtime/runtime'
 <template>
   <main>
     <canvas id="grid" width="1000px" height="800px" @click="cellClicked"></canvas>
+    <div id="iterations-count">{{ data.iterationsCount }}</div>
+    <button class="control-button" id="next-button" @click="next">Next</button>
+    <button class="control-button" id="clear-button" @click="reset">Reset Board</button>
+    <!-- <button class="control-button" id="start-button" @click="start">Start</button> -->
+    
     <!-- <div id="controls">
       <button type="button" id="zoom-in">+</button>
       <button type="button" id="zoom-out">-</button>
@@ -89,10 +131,57 @@ main {
   height: 100vh;
 }
 
+canvas {
+  background-color: #FFFFFF;
+}
+
 #controls {
   margin-top: -6px;
   padding: 20px;
   border-top: 1px solid #a3a2a2;
+}
+
+#iterations-count {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  padding: 5px 15px;
+  background-color: white;
+  border: 1px solid #a3a2a2;
+  border-radius: 15px;
+}
+
+.control-button {
+  position: absolute;
+  bottom: 15px;
+  padding: 5px 15px;
+  background-color: white;
+  border: 1px solid #a3a2a2;
+  border-radius: 15px;
+  font-size: 16px;
+  box-shadow: 2px 2px #C187D1;
+  transition: 0.5s;
+}
+
+#next-button {
+  left: 15px;
+}
+
+#clear-button {
+  left: 90px;
+}
+
+
+#next-button:hover {
+  box-shadow: 5px 5px #C187D1;
+  left: 12px;
+  bottom: 18px;
+}
+
+#clear-button:hover {
+  box-shadow: 5px 5px #C187D1;
+  left: 87px;
+  bottom: 18px;
 }
 
 </style>
