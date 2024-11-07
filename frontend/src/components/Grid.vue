@@ -1,6 +1,6 @@
 <script setup>
 import {reactive, onMounted} from 'vue'
-import {Start, Next, Reset, StoreCell} from '../../wailsjs/go/main/App'
+import {StartStop, Next, Reset, StoreCell} from '../../wailsjs/go/main/App'
 import {EventsOn} from '../../wailsjs/runtime/runtime'
 
 // EventsOn("CountUp", (count) => data.resultText = count)
@@ -23,12 +23,12 @@ import {EventsOn} from '../../wailsjs/runtime/runtime'
     drawBoard()
   })
 
-  EventsOn("Start", (filledCells) => periodicFillCallback(iterations, filledCells))
+  EventsOn("StartStop", (iterations, filledCells) => periodicFillCallback(iterations, filledCells))
   EventsOn("Next", (filledCells) => singularFillCallback(filledCells))
   EventsOn("Reset", (filledCells) => singularFillCallback(filledCells))
 
-  function start() {
-    Start()
+  function startStop() {
+    StartStop()
   }
 
   function next() {
@@ -44,7 +44,8 @@ import {EventsOn} from '../../wailsjs/runtime/runtime'
   }
 
   function periodicFillCallback(iterations, filledCells) {
-
+    data.iterations = iterations
+    singularFillCallback(filledCells)
   }
 
   function singularFillCallback(filledCells) {
@@ -113,9 +114,10 @@ import {EventsOn} from '../../wailsjs/runtime/runtime'
   <main>
     <canvas id="grid" width="1000px" height="800px" @click="cellClicked"></canvas>
     <div id="iterations-count">{{ data.iterationsCount }}</div>
+    <button class="control-button" id="start-button" @click="startStop">Start/Stop</button>
     <button class="control-button" id="next-button" @click="next">Next</button>
     <button class="control-button" id="clear-button" @click="reset">Reset Board</button>
-    <!-- <button class="control-button" id="start-button" @click="start">Start</button> -->
+    
     
     <!-- <div id="controls">
       <button type="button" id="zoom-in">+</button>
@@ -167,24 +169,34 @@ canvas {
   transition: 0.5s;
 }
 
-#next-button {
+#start-button {
   left: 15px;
 }
 
+#next-button {
+  left: 130px;
+}
+
 #clear-button {
-  left: 90px;
+  left: 205px
 }
 
 
-#next-button:hover {
+#start-button:hover {
   box-shadow: 5px 5px #C187D1;
   left: 12px;
   bottom: 18px;
 }
 
+#next-button:hover {
+  box-shadow: 5px 5px #C187D1;
+  left: 127px;
+  bottom: 18px;
+}
+
 #clear-button:hover {
   box-shadow: 5px 5px #C187D1;
-  left: 87px;
+  left: 202px;
   bottom: 18px;
 }
 

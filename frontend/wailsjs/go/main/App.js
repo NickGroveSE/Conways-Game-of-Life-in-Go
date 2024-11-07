@@ -10,8 +10,8 @@ export function Reset() {
   return window['go']['main']['App']['Reset']();
 }
 
-export function Start() {
-  return window['go']['main']['App']['Start']();
+export function StartStop() {
+  return window['go']['main']['App']['StartStop']();
 }
 
 export function StoreCell(arg1, arg2, arg3) {

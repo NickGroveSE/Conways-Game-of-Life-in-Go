@@ -33,8 +33,9 @@ type Cell struct {
 // }
 
 var (
-	stepCount int = 0
-	grid      [][]*Cell
+	stepCount   int = 0
+	grid        [][]*Cell
+	timerPaused bool = true
 )
 
 const (
@@ -131,24 +132,34 @@ func (c *Cell) snap() {
 
 }
 
-func (a *App) Start() string {
-	go func() {
-		ticker := time.NewTicker(time.Second)
-		defer ticker.Stop()
-		done := make(chan bool)
+func (a *App) StartStop() string {
 
-		for {
-			select {
-			case <-done:
-				fmt.Println("Done!")
-				return
-			case <-ticker.C:
-				stepCount++
-				fmt.Println("Iterations: ", stepCount)
-				runtime.EventsEmit(a.ctx, "Start", fmt.Sprintf("Iterations: %d", stepCount))
+	timerPaused = !timerPaused
+
+	if !timerPaused {
+
+		go func() {
+			ticker := time.NewTicker(time.Second / 10)
+			defer ticker.Stop()
+			done := make(chan bool)
+
+			for {
+				select {
+				case <-done:
+					return
+				case <-ticker.C:
+					if timerPaused {
+						done <- true
+					}
+					stepCount++
+					filledCells := a.gatherFilledCells(make([][2]int, 0))
+					runtime.EventsEmit(a.ctx, "StartStop", fmt.Sprintf("Iterations: %d", stepCount), filledCells)
+				}
 			}
-		}
-	}()
+		}()
+
+	}
+
 	return fmt.Sprintf("Iterations: %d", 0)
 }
 
@@ -158,50 +169,7 @@ func (a *App) Next() string {
 
 	go func() {
 
-		filledCells := make([][2]int, 0)
-
-		for i := range grid {
-			for j := range grid[i] {
-				neighborCount := 0
-				grid[i][j].snap()
-				for _, value := range grid[i][j].NeighborSnapshot {
-					if value == 1 {
-						neighborCount++
-					}
-
-					if neighborCount == 4 {
-						break
-					}
-				}
-
-				if grid[i][j].Value == 1 {
-					if neighborCount > 1 && neighborCount < 4 {
-						grid[i][j].ImpendingValue = 1
-					} else {
-						grid[i][j].ImpendingValue = 0
-					}
-				} else {
-					if neighborCount == 3 {
-						grid[i][j].ImpendingValue = 1
-					} else {
-						grid[i][j].ImpendingValue = 0
-					}
-				}
-
-				if grid[i][j].ImpendingValue == 1 {
-					coordinates := [2]int{i, j}
-					filledCells = append(filledCells, coordinates)
-				}
-
-			}
-		}
-
-		for i := range grid {
-			for j := range grid[i] {
-				grid[i][j].Value = grid[i][j].ImpendingValue
-			}
-		}
-
+		filledCells := a.gatherFilledCells(make([][2]int, 0))
 		runtime.EventsEmit(a.ctx, "Next", filledCells)
 
 	}()
@@ -215,7 +183,7 @@ func (a *App) Reset() string {
 	go func() {
 		a.buildMatrix(50, 40)
 
-		runtime.EventsEmit(a.ctx, "Next", make([][2]int, 0))
+		runtime.EventsEmit(a.ctx, "Reset", make([][2]int, 0))
 	}()
 
 	return fmt.Sprintf("Iterations: %d", stepCount)
@@ -231,4 +199,50 @@ func (a *App) StoreCell(x int, y int, filled bool) string {
 		return fmt.Sprintf("Cell %d,%d is now blank", x, y)
 	}
 
+}
+
+func (a *App) gatherFilledCells(filledCells [][2]int) [][2]int {
+	for i := range grid {
+		for j := range grid[i] {
+			neighborCount := 0
+			grid[i][j].snap()
+			for _, value := range grid[i][j].NeighborSnapshot {
+				if value == 1 {
+					neighborCount++
+				}
+
+				if neighborCount == 4 {
+					break
+				}
+			}
+
+			if grid[i][j].Value == 1 {
+				if neighborCount > 1 && neighborCount < 4 {
+					grid[i][j].ImpendingValue = 1
+				} else {
+					grid[i][j].ImpendingValue = 0
+				}
+			} else {
+				if neighborCount == 3 {
+					grid[i][j].ImpendingValue = 1
+				} else {
+					grid[i][j].ImpendingValue = 0
+				}
+			}
+
+			if grid[i][j].ImpendingValue == 1 {
+				coordinates := [2]int{i, j}
+				filledCells = append(filledCells, coordinates)
+			}
+
+		}
+	}
+
+	for i := range grid {
+		for j := range grid[i] {
+			grid[i][j].Value = grid[i][j].ImpendingValue
+		}
+	}
+
+	return filledCells
 }

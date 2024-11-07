@@ -5,6 +5,6 @@ export function Next():Promise<string>;
 
 export function Reset():Promise<string>;
 
-export function Start():Promise<string>;
+export function StartStop():Promise<string>;
 
 export function StoreCell(arg1:number,arg2:number,arg3:boolean):Promise<string>;
